@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>约拍计算器</title>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <style>
+        :root { --p: #f2a6bc; --dp: #d17a94; --lp: #fff5f7; --t: #8a4d5d; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--lp); font-family: -apple-system, sans-serif; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        .card { width: 100%; max-width: 400px; background: #fff; border: 2px solid var(--p); border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); overflow: hidden; margin-bottom: 20px; }
+        .header { background: var(--p); color: #fff; text-align: center; padding: 20px; font-weight: bold; font-size: 20px; letter-spacing: 2px; }
+        .content { padding: 15px; }
+        .item { background: var(--lp); padding: 12px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(242, 166, 188, 0.1); }
+        input, select { border: 1px solid var(--p); border-radius: 6px; padding: 8px; width: 90px; font-size: 16px; outline: none; background: #fff; color: var(--t); }
+        .check-group { display: flex; flex-direction: column; gap: 8px; padding: 10px; }
+        .check-item { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+        input[type="checkbox"], input[type="radio"] { width: 22px; height: 22px; accent-color: var(--dp); }
+        .res-area { background: var(--lp); padding: 15px; border-radius: 15px; border: 1px dashed var(--p); margin-top: 15px; }
+        .res-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
+        .final { border-top: 2px solid var(--p); padding-top: 12px; margin-top: 10px; font-weight: bold; color: var(--dp); font-size: 22px; }
+        .btn { width: 100%; max-width: 400px; background: var(--dp); color: #fff; border: none; padding: 16px; border-radius: 14px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(209, 122, 148, 0.3); }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; z-index: 1000; }
+        .overlay img { max-width: 100%; border-radius: 12px; border: 3px solid #fff; }
+        .tip { color: #fff; margin-bottom: 15px; font-size: 14px; }
+        .close { color: #fff; margin-top: 20px; border: 1px solid #fff; padding: 8px 20px; border-radius: 20px; }
+    </style>
+</head>
+<body>
+<div class="card" id="card">
+    <div class="header">收费计算器</div>
+    <div class="content">
+        <div class="item"><label>时长 (小时)</label><input type="number" id="h" value="1" min="1" oninput="u()"></div>
+        <div class="check-item" style="margin-bottom:15px; padding-left:5px;"><input type="checkbox" id="db" onchange="u()"><label>双人拍摄 (+$10/h)</label></div>
+        <div style="font-size:13px; color:var(--dp); margin-bottom:10px; font-weight:bold;">拍摄环境 (不叠加)：</div>
+        <div class="check-group">
+            <label class="check-item"><input type="radio" name="e" id="i" checked onchange="u()"> 室内拍摄</label>
+            <label class="check-item"><input type="radio" name="e" id="o" onchange="u()"> 室外拍摄 (+$5/h)</label>
+            <label class="check-item"><input type="radio" name="e" id="ht" onchange="u()"> 气温30度以上 (+$10/h)</label>
+        </div>
+        <div class="item" style="margin-top:10px;"><label>交通/地点</label>
+            <select id="t" onchange="u()">
+                <option value="8">NUS/NTU ($8)</option>
+                <option value="10">其他地点 ($10)</option>
+                <option value="0">NTU免车费</option>
+            </select>
+        </div>
+        <div class="res-area">
+            <div class="res-row"><span>总费用</span><span id="tc"></span></div>
+            <div class="res-row" style="opacity:0.6"><span>定金抵扣</span><span>-$25</span></div>
+            <div class="res-row final"><span>拍完补差价</span><span id="fc"></span></div>
+        </div>
+    </div>
+</div>
+<button class="btn" onclick="s()">生成图片发送给客户</button>
+<div class="overlay" id="ov">
+    <div class="tip">图片已生成，长按保存或转发</div>
+    <img id="mi">
+    <div class="close" onclick="document.getElementById('ov').style.display='none'">返回修改</div>
+</div>
+<script>
+    function u(){
+        let h=Math.max(1,parseInt(document.getElementById('h').value)||1),
+            db=document.getElementById('db').checked?10:0,
+            e=document.getElementById('ht').checked?10:(document.getElementById('o').checked?5:0),
+            t=parseInt(document.getElementById('t').value);
+        let total = (30+db+e)*h+t;
+        document.getElementById('tc').innerText='$'+total;
+        document.getElementById('fc').innerText='$'+(total-25);
+    }
+    u();
+    function s(){
+        html2canvas(document.getElementById('card'),{backgroundColor:"#fff5f7",scale:3}).then(canvas=>{
+            document.getElementById('mi').src=canvas.toDataURL("image/png");
+            document.getElementById('ov').style.display='flex';
+        });
+    }
+</script>
+</body>
+</html>
