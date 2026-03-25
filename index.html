@@ -3,141 +3,260 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>约拍专业计算器</title>
+    <title>约拍计费 Pro</title>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
-        :root { --p: #f2a6bc; --dp: #d17a94; --lp: #fff5f7; --t: #8a4d5d; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--lp); font-family: -apple-system, sans-serif; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        .card { width: 100%; max-width: 400px; background: #fff; border: 2px solid var(--p); border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); overflow: hidden; margin-bottom: 15px; }
-        .header { background: var(--p); color: #fff; text-align: center; padding: 15px; font-weight: bold; font-size: 18px; letter-spacing: 2px; }
-        .content { padding: 15px; }
-        .section-title { font-size: 12px; color: var(--dp); font-weight: bold; margin: 10px 0 5px; border-left: 3px solid var(--p); padding-left: 8px; }
-        .item { background: var(--lp); padding: 10px; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
-        input[type="number"], select { border: 1px solid var(--p); border-radius: 6px; padding: 6px; width: 80px; font-size: 14px; outline: none; background: #fff; }
-        .check-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 5px; }
-        .check-item { display: flex; align-items: center; gap: 8px; font-size: 13px; background: white; padding: 8px; border-radius: 8px; border: 1px solid var(--lp); }
-        input[type="checkbox"], input[type="radio"] { width: 18px; height: 18px; accent-color: var(--dp); }
-        .res-area { background: var(--lp); padding: 15px; border-radius: 15px; border: 1px dashed var(--p); margin-top: 15px; }
-        .res-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 13px; }
-        .discount-tag { font-size: 11px; color: #e74c3c; background: #ffdada; padding: 2px 6px; border-radius: 4px; margin-left: 5px; }
-        .final { border-top: 2px solid var(--p); padding-top: 10px; margin-top: 8px; font-weight: bold; color: var(--dp); font-size: 20px; }
-        .btn { width: 100%; max-width: 400px; background: var(--dp); color: #fff; border: none; padding: 15px; border-radius: 12px; font-size: 15px; font-weight: bold; cursor: pointer; }
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; z-index: 1000; }
-        .overlay img { max-width: 100%; border-radius: 12px; border: 3px solid #fff; }
-        .close { color: #fff; margin-top: 15px; border: 1px solid #fff; padding: 6px 20px; border-radius: 20px; font-size: 13px; }
+        :root {
+            --primary: #f2a6bc;
+            --primary-dark: #d17a94;
+            --bg: #fff9fb;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --text: #5d4048;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        
+        body {
+            background: var(--bg);
+            background-image: radial-gradient(circle at 10% 10%, #fff0f5 0%, transparent 30%),
+                              radial-gradient(circle at 90% 90%, #fff0f5 0%, transparent 30%);
+            font-family: -apple-system, "PingFang SC", sans-serif;
+            margin: 0; padding: 20px 15px;
+            color: var(--text);
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        .container {
+            width: 100%; max-width: 420px;
+            background: var(--card-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(242, 166, 188, 0.4);
+            border-radius: 32px;
+            box-shadow: 0 20px 50px rgba(242, 166, 188, 0.2);
+            overflow: hidden;
+            animation: slideUp 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            padding: 30px 20px; text-align: center; color: white;
+        }
+        .header h1 { margin: 0; font-size: 24px; letter-spacing: 3px; font-weight: 700; }
+        .header p { margin: 8px 0 0; font-size: 13px; opacity: 0.85; }
+
+        .form-section { padding: 25px; }
+        .group-title { font-size: 14px; font-weight: bold; color: var(--primary-dark); margin: 20px 0 12px; display: flex; align-items: center; }
+        .group-title::after { content: ""; flex: 1; height: 1px; background: linear-gradient(to right, #f2a6bc55, transparent); margin-left: 10px; }
+
+        .input-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        
+        /* 步进器 */
+        .stepper { display: flex; align-items: center; background: #fff1f5; border-radius: 14px; padding: 4px; border: 1px solid #f2a6bc33; }
+        .stepper button { border: none; background: white; color: var(--primary-dark); width: 36px; height: 36px; border-radius: 10px; font-weight: bold; font-size: 20px; box-shadow: 0 2px 8px rgba(242, 166, 188, 0.15); transition: 0.2s; }
+        .stepper button:active { transform: scale(0.9); background: #fdf2f5; }
+        .stepper span { width: 60px; text-align: center; font-weight: 700; font-size: 17px; color: var(--primary-dark); }
+
+        /* 标签选择 */
+        .chip-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px; }
+        .chip {
+            background: white; border: 1.5px solid #eee; padding: 14px; border-radius: 18px;
+            text-align: center; font-size: 14px; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex; align-items: center; justify-content: center; gap: 8px; color: #888;
+        }
+        .chip.active { background: #fff1f5; border-color: var(--primary); color: var(--primary-dark); font-weight: bold; transform: scale(1.02); box-shadow: 0 6px 15px rgba(242, 166, 188, 0.15); }
+        
+        select {
+            width: 100%; border: 1.5px solid #eee; border-radius: 15px; padding: 14px;
+            font-size: 15px; color: var(--text); appearance: none; background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23d17a94' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E") no-repeat right 20px center;
+        }
+
+        /* 账单明细 */
+        .bill { background: linear-gradient(to bottom, #fff1f5, #fff9fb); border-radius: 24px; padding: 22px; margin-top: 15px; border: 1.5px dashed var(--primary); }
+        .bill-item { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; color: #7d636a; }
+        .bill-total { border-top: 1px solid rgba(242, 166, 188, 0.3); margin-top: 15px; padding-top: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .bill-total span:first-child { font-weight: bold; }
+        .bill-total span:last-child { color: var(--primary-dark); font-size: 28px; font-weight: 800; }
+
+        .btn-capture {
+            width: 100%; max-width: 420px; margin-top: 25px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white; border: none; padding: 20px; border-radius: 22px;
+            font-size: 17px; font-weight: bold; letter-spacing: 1px;
+            box-shadow: 0 12px 25px rgba(242, 166, 188, 0.4);
+            transition: all 0.3s;
+        }
+        .btn-capture:active { transform: scale(0.97); opacity: 0.9; }
+
+        /* 预览层 */
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+        .overlay img { max-width: 100%; border-radius: 20px; box-shadow: 0 0 40px rgba(0,0,0,0.5); }
+        .overlay p { color: white; margin-top: 20px; font-size: 15px; font-weight: 300; }
+        
+        .promo-tag { font-size: 11px; background: #ff4757; color: white; padding: 2px 8px; border-radius: 20px; vertical-align: middle; margin-left: 5px; }
     </style>
 </head>
 <body>
 
-<div class="card" id="card">
-    <div class="header">收费计算器</div>
-    <div class="content">
-        <div class="section-title">基础与租赁</div>
-        <div class="item">
+<div class="container" id="mainCard">
+    <div class="header">
+        <h1>约拍收费计算器</h1>
+        <p id="todayDate">2026年03月25日 星期三</p>
+    </div>
+
+    <div class="form-section">
+        <div class="group-title">时长与人数</div>
+        <div class="input-row">
             <label>拍摄时长 (h)</label>
-            <input type="number" id="h" value="1" min="1" oninput="u()">
-        </div>
-        <div class="check-item" style="width: 100%; margin-bottom: 10px;">
-            <input type="checkbox" id="gown" onchange="u()">
-            <label>租赁毕业袍 (+$10/h)</label>
-        </div>
-
-        <div class="section-title">拍摄人数</div>
-        <div class="check-group">
-            <label class="check-item"><input type="radio" name="p" id="p1" checked onchange="u()"> 单人基础</label>
-            <label class="check-item"><input type="radio" name="p" id="p2" onchange="u()"> 双人(+$10/h)</label>
-        </div>
-
-        <div class="section-title">环境 (不叠加)</div>
-        <div class="check-group">
-            <label class="check-item"><input type="radio" name="e" id="i" checked onchange="u()"> 室内</label>
-            <label class="check-item"><input type="radio" name="e" id="o" onchange="u()"> 室外(+$5/h)</label>
-            <label class="check-item" style="grid-column: span 2;"><input type="radio" name="e" id="ht" onchange="u()"> 高温30℃+(+$10/h)</label>
-        </div>
-
-        <div class="section-title">地点与优惠设置</div>
-        <div class="item">
-            <label>交通费</label>
-            <select id="t" onchange="u()">
-                <option value="8">NUS/NTU ($8)</option>
-                <option value="10">其他地点 ($10)</option>
-                <option value="0">周二/四免车费</option>
-            </select>
-        </div>
-        <div class="item">
-            <label>当前折扣 (如0.9)</label>
-            <input type="number" id="ds" value="0.9" step="0.05" oninput="u()">
-        </div>
-
-        <div class="res-area">
-            <div class="res-row"><span>原始总价</span><span id="orig"></span></div>
-            <div class="res-row" style="color:#e74c3c">
-                <span>优惠减免</span>
-                <span>-<span id="minus"></span> <b id="strategy" style="font-size:10px"></b></span>
+            <div class="stepper">
+                <button onclick="changeHour(-0.5)">-</button>
+                <span id="hourVal">1.0</span>
+                <button onclick="changeHour(0.5)">+</button>
             </div>
-            <div class="res-row" style="opacity:0.6"><span>预付定金</span><span>-$25</span></div>
-            <div class="res-row final"><span>拍完补差价</span><span id="fc"></span></div>
+        </div>
+        <div class="input-row">
+            <label>增加人数 (除单人外)</label>
+            <div class="stepper">
+                <button onclick="changePeople(-1)">-</button>
+                <span id="pplVal">0</span>
+                <button onclick="changePeople(1)">+</button>
+            </div>
+        </div>
+
+        <div class="group-title">附加配置</div>
+        <div class="chip" id="gownBtn" onclick="toggleGown()" style="width: 100%; margin-bottom: 12px;">
+            <span>🎓 毕业袍租赁 (+$10/h)</span>
+        </div>
+        <div class="chip-group">
+            <div class="chip active" id="e_indoor" onclick="setEnv('indoor')">🏠 室内</div>
+            <div class="chip" id="e_outdoor" onclick="setEnv('outdoor')">🌳 室外(+$5)</div>
+            <div class="chip" style="grid-column: span 2;" id="e_hot" onclick="setEnv('hot')">🔥 高温30℃+(+$10)</div>
+        </div>
+
+        <div class="group-title">地点选择</div>
+        <select id="loc" onchange="calc()">
+            <option value="8">NTU / NUS ($8)</option>
+            <option value="10">其他地点 ($10)</option>
+        </select>
+
+        <div class="bill">
+            <div class="bill-item"><span>基础费用 (单价×时长)</span><span id="row_base"></span></div>
+            <div class="bill-item"><span>环境附加</span><span id="row_env"></span></div>
+            <div class="bill-item">
+                <span>交通费用 <span id="promoTag" class="promo-tag" style="display:none">免单中</span></span>
+                <span id="row_trans"></span>
+            </div>
+            <div class="bill-item" style="color:var(--primary-dark); font-weight:bold;">
+                <span>全单优惠 (9折)</span><span id="row_disc"></span>
+            </div>
+            <div class="bill-total">
+                <span>拍完补差价</span>
+                <span id="finalPrice">$0.0</span>
+            </div>
+            <p style="font-size: 10px; color: #aaa; margin: 10px 0 0; text-align: center;">* 已自动抵扣$25定金</p>
         </div>
     </div>
 </div>
 
-<button class="btn" onclick="s()">生成结算图发送客户</button>
+<button class="btn-capture" onclick="capture()">生成结算单发给客户</button>
 
-<div class="overlay" id="ov">
-    <div style="color:#fff; margin-bottom:10px; font-size:14px;">图片已生成，长按保存</div>
-    <img id="mi">
-    <div class="close" onclick="document.getElementById('ov').style.display='none'">返回修改</div>
+<div class="overlay" id="overlay" onclick="this.style.display='none'">
+    <img id="previewImg">
+    <p>↑ 长按图片保存到相册 ↑</p>
 </div>
 
 <script>
-    function u(){
-        // 1. 获取基础值
-        const h = Math.max(1, parseInt(document.getElementById('h').value) || 1);
-        const transport = parseInt(document.getElementById('t').value);
-        const discountRate = parseFloat(document.getElementById('ds').value) || 1;
+    let state = {
+        hours: 1.0,
+        extraPpl: 0,
+        hasGown: false,
+        env: 'indoor'
+    };
 
-        // 2. 计算每小时单价叠加
-        let hourlyPrice = 30; // 基础价
-        if(document.getElementById('p2').checked) hourlyPrice += 10; // 双人
-        if(document.getElementById('gown').checked) hourlyPrice += 10; // 毕业袍
-        
-        // 环境加价（不叠加）
-        if(document.getElementById('ht').checked) hourlyPrice += 10;
-        else if(document.getElementById('o').checked) hourlyPrice += 5;
+    // 初始化日期显示
+    const today = new Date();
+    const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+    document.getElementById('todayDate').innerText = today.toLocaleDateString('zh-CN', options);
 
-        const subtotal = hourlyPrice * h; // 拍摄+租赁总额
-        const fullPrice = subtotal + transport; // 没有任何优惠时的原价
+    function changeHour(val) {
+        state.hours = Math.max(0.5, state.hours + val);
+        document.getElementById('hourVal').innerText = state.hours.toFixed(1);
+        calc();
+    }
 
-        // 3. 比较两种优惠方案 (取其一：最优惠原则)
-        const planA = fullPrice * discountRate; // 方案A：直接全单打折
-        const planB = subtotal; // 方案B：免交通费 (即只付拍摄费)
+    function changePeople(val) {
+        state.extraPpl = Math.max(0, state.extraPpl + val);
+        document.getElementById('pplVal').innerText = state.extraPpl;
+        calc();
+    }
 
-        let finalTotal, strategyText;
-        if (planA <= planB) {
-            finalTotal = planA;
-            strategyText = "(已选最高折扣)";
+    function toggleGown() {
+        state.hasGown = !state.hasGown;
+        document.getElementById('gownBtn').classList.toggle('active');
+        calc();
+    }
+
+    function setEnv(type) {
+        state.env = type;
+        ['e_indoor', 'e_outdoor', 'e_hot'].forEach(id => document.getElementById(id).classList.remove('active'));
+        document.getElementById('e_' + type).classList.add('active');
+        calc();
+    }
+
+    function calc() {
+        // 1. 计算每小时单价
+        let hourlyRate = 30; // 基础价
+        hourlyRate += state.extraPpl * 10; // 每多一人 +10
+        if(state.hasGown) hourlyRate += 10; // 毕业袍 +10
+
+        // 2. 环境加价
+        let envRate = 0;
+        if(state.env === 'outdoor') envRate = 5;
+        if(state.env === 'hot') envRate = 10;
+
+        const baseTotal = hourlyRate * state.hours;
+        const envTotal = envRate * state.hours;
+
+        // 3. 智能判断交通费 (4月30日前周二/四免车费)
+        let transFee = parseInt(document.getElementById('loc').value);
+        const day = today.getDay(); // 0(周日) - 6(周六)
+        const isPromoDate = today <= new Date('2026-04-30');
+        const isPromoDay = (day === 2 || day === 4); // 周二或周四
+        const isNTU = transFee === 8;
+
+        if (isPromoDate && isPromoDay && isNTU) {
+            transFee = 0;
+            document.getElementById('promoTag').style.display = 'inline';
         } else {
-            finalTotal = planB;
-            strategyText = "(已选免交通优惠)";
+            document.getElementById('promoTag').style.display = 'none';
         }
 
-        // 4. 更新界面
-        document.getElementById('orig').innerText = '$' + fullPrice;
-        document.getElementById('minus').innerText = '$' + (fullPrice - finalTotal).toFixed(1);
-        document.getElementById('strategy').innerText = strategyText;
-        document.getElementById('fc').innerText = '$' + (finalTotal - 25).toFixed(1);
+        // 4. 总价与 9 折
+        const subTotal = baseTotal + envTotal + transFee;
+        const finalTotal = subTotal * 0.9;
+        const finalPay = finalTotal - 25;
+
+        // 5. 渲染
+        document.getElementById('row_base').innerText = `$${baseTotal.toFixed(1)}`;
+        document.getElementById('row_env').innerText = `$${envTotal.toFixed(1)}`;
+        document.getElementById('row_trans').innerText = `$${transFee}`;
+        document.getElementById('row_disc').innerText = `-$${(subTotal * 0.1).toFixed(1)}`;
+        document.getElementById('finalPrice').innerText = `$${Math.max(0, finalPay).toFixed(1)}`;
     }
 
-    u();
-
-    function s(){
-        const card = document.getElementById('card');
-        html2canvas(card, {backgroundColor:"#fff5f7", scale:3, useCORS:true}).then(canvas=>{
-            document.getElementById('mi').src = canvas.toDataURL("image/png");
-            document.getElementById('ov').style.display = 'flex';
+    function capture() {
+        html2canvas(document.getElementById('mainCard'), {
+            backgroundColor: "#fff9fb",
+            scale: 3,
+            borderRadius: 32
+        }).then(canvas => {
+            document.getElementById('previewImg').src = canvas.toDataURL("image/png");
+            document.getElementById('overlay').style.display = 'flex';
         });
     }
+
+    calc();
 </script>
 </body>
 </html>
