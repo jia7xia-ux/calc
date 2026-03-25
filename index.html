@@ -3,77 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>约拍计算器</title>
+    <title>约拍专业计算器</title>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
         :root { --p: #f2a6bc; --dp: #d17a94; --lp: #fff5f7; --t: #8a4d5d; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--lp); font-family: -apple-system, sans-serif; margin: 0; padding: 15px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        .card { width: 100%; max-width: 400px; background: #fff; border: 2px solid var(--p); border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); overflow: hidden; margin-bottom: 20px; }
-        .header { background: var(--p); color: #fff; text-align: center; padding: 20px; font-weight: bold; font-size: 20px; letter-spacing: 2px; }
+        body { background: var(--lp); font-family: -apple-system, sans-serif; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        .card { width: 100%; max-width: 400px; background: #fff; border: 2px solid var(--p); border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); overflow: hidden; margin-bottom: 15px; }
+        .header { background: var(--p); color: #fff; text-align: center; padding: 15px; font-weight: bold; font-size: 18px; letter-spacing: 2px; }
         .content { padding: 15px; }
-        .item { background: var(--lp); padding: 12px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(242, 166, 188, 0.1); }
-        input, select { border: 1px solid var(--p); border-radius: 6px; padding: 8px; width: 90px; font-size: 16px; outline: none; background: #fff; color: var(--t); }
-        .check-group { display: flex; flex-direction: column; gap: 8px; padding: 10px; }
-        .check-item { display: flex; align-items: center; gap: 10px; font-size: 14px; }
-        input[type="checkbox"], input[type="radio"] { width: 22px; height: 22px; accent-color: var(--dp); }
+        .section-title { font-size: 12px; color: var(--dp); font-weight: bold; margin: 10px 0 5px; border-left: 3px solid var(--p); padding-left: 8px; }
+        .item { background: var(--lp); padding: 10px; border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        input[type="number"], select { border: 1px solid var(--p); border-radius: 6px; padding: 6px; width: 80px; font-size: 14px; outline: none; background: #fff; }
+        .check-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 5px; }
+        .check-item { display: flex; align-items: center; gap: 8px; font-size: 13px; background: white; padding: 8px; border-radius: 8px; border: 1px solid var(--lp); }
+        input[type="checkbox"], input[type="radio"] { width: 18px; height: 18px; accent-color: var(--dp); }
         .res-area { background: var(--lp); padding: 15px; border-radius: 15px; border: 1px dashed var(--p); margin-top: 15px; }
-        .res-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
-        .final { border-top: 2px solid var(--p); padding-top: 12px; margin-top: 10px; font-weight: bold; color: var(--dp); font-size: 22px; }
-        .btn { width: 100%; max-width: 400px; background: var(--dp); color: #fff; border: none; padding: 16px; border-radius: 14px; font-size: 16px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(209, 122, 148, 0.3); }
+        .res-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 13px; }
+        .discount-tag { font-size: 11px; color: #e74c3c; background: #ffdada; padding: 2px 6px; border-radius: 4px; margin-left: 5px; }
+        .final { border-top: 2px solid var(--p); padding-top: 10px; margin-top: 8px; font-weight: bold; color: var(--dp); font-size: 20px; }
+        .btn { width: 100%; max-width: 400px; background: var(--dp); color: #fff; border: none; padding: 15px; border-radius: 12px; font-size: 15px; font-weight: bold; cursor: pointer; }
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; z-index: 1000; }
         .overlay img { max-width: 100%; border-radius: 12px; border: 3px solid #fff; }
-        .tip { color: #fff; margin-bottom: 15px; font-size: 14px; }
-        .close { color: #fff; margin-top: 20px; border: 1px solid #fff; padding: 8px 20px; border-radius: 20px; }
+        .close { color: #fff; margin-top: 15px; border: 1px solid #fff; padding: 6px 20px; border-radius: 20px; font-size: 13px; }
     </style>
 </head>
 <body>
+
 <div class="card" id="card">
-    <div class="header">收费计算器</div>
+    <div class="header">约拍收费计算器 (Pro)</div>
     <div class="content">
-        <div class="item"><label>时长 (小时)</label><input type="number" id="h" value="1" min="1" oninput="u()"></div>
-        <div class="check-item" style="margin-bottom:15px; padding-left:5px;"><input type="checkbox" id="db" onchange="u()"><label>双人拍摄 (+$10/h)</label></div>
-        <div style="font-size:13px; color:var(--dp); margin-bottom:10px; font-weight:bold;">拍摄环境 (不叠加)：</div>
-        <div class="check-group">
-            <label class="check-item"><input type="radio" name="e" id="i" checked onchange="u()"> 室内拍摄</label>
-            <label class="check-item"><input type="radio" name="e" id="o" onchange="u()"> 室外拍摄 (+$5/h)</label>
-            <label class="check-item"><input type="radio" name="e" id="ht" onchange="u()"> 气温30度以上 (+$10/h)</label>
+        <div class="section-title">基础与租赁</div>
+        <div class="item">
+            <label>拍摄时长 (h)</label>
+            <input type="number" id="h" value="1" min="1" oninput="u()">
         </div>
-        <div class="item" style="margin-top:10px;"><label>交通/地点</label>
+        <div class="check-item" style="width: 100%; margin-bottom: 10px;">
+            <input type="checkbox" id="gown" onchange="u()">
+            <label>租赁毕业袍 (+$10/h)</label>
+        </div>
+
+        <div class="section-title">拍摄人数</div>
+        <div class="check-group">
+            <label class="check-item"><input type="radio" name="p" id="p1" checked onchange="u()"> 单人基础</label>
+            <label class="check-item"><input type="radio" name="p" id="p2" onchange="u()"> 双人(+$10/h)</label>
+        </div>
+
+        <div class="section-title">环境 (不叠加)</div>
+        <div class="check-group">
+            <label class="check-item"><input type="radio" name="e" id="i" checked onchange="u()"> 室内</label>
+            <label class="check-item"><input type="radio" name="e" id="o" onchange="u()"> 室外(+$5/h)</label>
+            <label class="check-item" style="grid-column: span 2;"><input type="radio" name="e" id="ht" onchange="u()"> 高温30℃+(+$10/h)</label>
+        </div>
+
+        <div class="section-title">地点与优惠设置</div>
+        <div class="item">
+            <label>交通费</label>
             <select id="t" onchange="u()">
                 <option value="8">NUS/NTU ($8)</option>
                 <option value="10">其他地点 ($10)</option>
-                <option value="0">NTU免车费</option>
+                <option value="0">周二/四免车费</option>
             </select>
         </div>
+        <div class="item">
+            <label>当前折扣 (如0.9)</label>
+            <input type="number" id="ds" value="0.9" step="0.05" oninput="u()">
+        </div>
+
         <div class="res-area">
-            <div class="res-row"><span>总费用</span><span id="tc"></span></div>
-            <div class="res-row" style="opacity:0.6"><span>定金抵扣</span><span>-$25</span></div>
+            <div class="res-row"><span>原始总价</span><span id="orig"></span></div>
+            <div class="res-row" style="color:#e74c3c">
+                <span>优惠减免</span>
+                <span>-<span id="minus"></span> <b id="strategy" style="font-size:10px"></b></span>
+            </div>
+            <div class="res-row" style="opacity:0.6"><span>预付定金</span><span>-$25</span></div>
             <div class="res-row final"><span>拍完补差价</span><span id="fc"></span></div>
         </div>
     </div>
 </div>
-<button class="btn" onclick="s()">生成图片发送给客户</button>
+
+<button class="btn" onclick="s()">生成结算图发送客户</button>
+
 <div class="overlay" id="ov">
-    <div class="tip">图片已生成，长按保存或转发</div>
+    <div style="color:#fff; margin-bottom:10px; font-size:14px;">图片已生成，长按保存</div>
     <img id="mi">
     <div class="close" onclick="document.getElementById('ov').style.display='none'">返回修改</div>
 </div>
+
 <script>
     function u(){
-        let h=Math.max(1,parseInt(document.getElementById('h').value)||1),
-            db=document.getElementById('db').checked?10:0,
-            e=document.getElementById('ht').checked?10:(document.getElementById('o').checked?5:0),
-            t=parseInt(document.getElementById('t').value);
-        let total = (30+db+e)*h+t;
-        document.getElementById('tc').innerText='$'+total;
-        document.getElementById('fc').innerText='$'+(total-25);
+        // 1. 获取基础值
+        const h = Math.max(1, parseInt(document.getElementById('h').value) || 1);
+        const transport = parseInt(document.getElementById('t').value);
+        const discountRate = parseFloat(document.getElementById('ds').value) || 1;
+
+        // 2. 计算每小时单价叠加
+        let hourlyPrice = 30; // 基础价
+        if(document.getElementById('p2').checked) hourlyPrice += 10; // 双人
+        if(document.getElementById('gown').checked) hourlyPrice += 10; // 毕业袍
+        
+        // 环境加价（不叠加）
+        if(document.getElementById('ht').checked) hourlyPrice += 10;
+        else if(document.getElementById('o').checked) hourlyPrice += 5;
+
+        const subtotal = hourlyPrice * h; // 拍摄+租赁总额
+        const fullPrice = subtotal + transport; // 没有任何优惠时的原价
+
+        // 3. 比较两种优惠方案 (取其一：最优惠原则)
+        const planA = fullPrice * discountRate; // 方案A：直接全单打折
+        const planB = subtotal; // 方案B：免交通费 (即只付拍摄费)
+
+        let finalTotal, strategyText;
+        if (planA <= planB) {
+            finalTotal = planA;
+            strategyText = "(已选最高折扣)";
+        } else {
+            finalTotal = planB;
+            strategyText = "(已选免交通优惠)";
+        }
+
+        // 4. 更新界面
+        document.getElementById('orig').innerText = '$' + fullPrice;
+        document.getElementById('minus').innerText = '$' + (fullPrice - finalTotal).toFixed(1);
+        document.getElementById('strategy').innerText = strategyText;
+        document.getElementById('fc').innerText = '$' + (finalTotal - 25).toFixed(1);
     }
+
     u();
+
     function s(){
-        html2canvas(document.getElementById('card'),{backgroundColor:"#fff5f7",scale:3}).then(canvas=>{
-            document.getElementById('mi').src=canvas.toDataURL("image/png");
-            document.getElementById('ov').style.display='flex';
+        const card = document.getElementById('card');
+        html2canvas(card, {backgroundColor:"#fff5f7", scale:3, useCORS:true}).then(canvas=>{
+            document.getElementById('mi').src = canvas.toDataURL("image/png");
+            document.getElementById('ov').style.display = 'flex';
         });
     }
 </script>
